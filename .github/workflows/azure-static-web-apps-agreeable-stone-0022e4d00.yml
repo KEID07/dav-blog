@@ -20,18 +20,16 @@ jobs:
           submodules: true
           lfs: false
       
-      # 使用兼容的 Hugo 版本
-      - name: Setup Hugo
+      # 使用 Hugo Extended（支持 SCSS 编译）
+      - name: Setup Hugo Extended
         uses: peaceiris/actions-hugo@v2
         with:
-          hugo-version: '0.121.0'  # 使用与 Bullseye 兼容的版本
-          extended: false
+          hugo-version: '0.121.0'
+          extended: true  # 关键：启用 Extended 版本以支持 Sass
       
-      # 本地构建 Hugo
       - name: Build Hugo Site
         run: hugo --minify
 
-      # 使用预构建的输出部署
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -41,7 +39,7 @@ jobs:
           action: "upload"
           app_location: "/"
           output_location: "public"
-          skip_app_build: true  # 跳过 Oryx 构建，因为已预构建
+          skip_app_build: true
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
