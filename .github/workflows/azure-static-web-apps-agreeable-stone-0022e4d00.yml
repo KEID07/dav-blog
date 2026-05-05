@@ -19,19 +19,29 @@ jobs:
         with:
           submodules: true
           lfs: false
+      
+      # 使用兼容的 Hugo 版本
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.121.0'  # 使用与 Bullseye 兼容的版本
+          extended: false
+      
+      # 本地构建 Hugo
+      - name: Build Hugo Site
+        run: hugo --minify
+
+      # 使用预构建的输出部署
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_AGREEABLE_STONE_0022E4D00 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "/" # App source code path
-          api_location: "" # Api source code path - optional
-          output_location: "public" # Built app content directory - optional
-          ###### End of Repository/Build Configurations ######
+          app_location: "/"
+          output_location: "public"
+          skip_app_build: true  # 跳过 Oryx 构建，因为已预构建
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
