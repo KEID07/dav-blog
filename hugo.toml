@@ -1,0 +1,22 @@
+baseURL = '/'
+locale = 'en-us'
+title = 'D&D | Davis on Data'
+
+theme = "hugo-clarity"
+
+
+
+[[menu.main]]
+  name = "Main"
+  url = "/"
+  weight = 1
+
+[[menu.main]]
+  name = "Blog"
+  url = "/posts/"
+  weight = 2
+
+[[menu.main]]
+  name = "About"
+  url = "/about/"
+  weight = 3

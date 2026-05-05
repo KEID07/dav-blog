@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Azure Key Vault on D&amp;D | Davis on Data</title>
+    <link>//localhost:1313/tags/azure-key-vault/</link>
+    <description>Recent content in Azure Key Vault on D&amp;D | Davis on Data</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 08 Feb 2022 08:03:50 +0000</lastBuildDate><atom:link href="//localhost:1313/tags/azure-key-vault/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Power BI 企业数据安全</title>
+      <link>//localhost:1313/posts/2022-02-09-powerbi-enterprise-security/</link>
+      <pubDate>Tue, 08 Feb 2022 08:03:50 +0000</pubDate>
+      
+      <guid>//localhost:1313/posts/2022-02-09-powerbi-enterprise-security/</guid>
+      <description>
+        
+          
+            &lt;h1 id=&#34;前述&#34;&gt;前述&lt;/h1&gt;
+&lt;p&gt;数据不仅是企业对资产，也是企业的命脉，其重要性不言而喻。而随着越来越多的企业采用了Power BI作为其商务智能解决方案之一，用户对微软BI体系中数据的安全与合规性的要求也愈加严格。因文章篇幅问题，下文将以PBI及M365管理员的角度，节选Power BI平台中较为核心的数据安全问题，即“数据寄存，数据呈现及数据导出”几个方面进行图文讲解。&lt;/p&gt;
+&lt;h1 id=&#34;一pbi数据安全之数据寄存&#34;&gt;一、PBI数据安全之数据寄存&lt;/h1&gt;
+&lt;p&gt;当Power BI数据集发布到PBI Service后，其数据实际上存储在Azure Blob Storage, 在默认情况下，数据加密由Microsoft托管，而密钥的值，轮换规则以及加密方式则不受企业或组织的控制。尽管Microsoft使用了足够强大的256位AES加密算法，但在一些企业严苛的信息安全政策及合规部门严谨的审查工作面前，该说辞恐怕无济于事。为了使组织掌控密钥并使数据加密方式与轮换规则符合其政策，在Power BI实施BYOK（Bring your own Key）成为了唯一方案。&lt;/p&gt;
+&lt;h2 id=&#34;在pbi实施byok&#34;&gt;在PBI实施BYOK&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;注意：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;BYOK目前仅适用于PBI Premium (包括Capacity与Per User)&lt;/li&gt;
+&lt;li&gt;BYOK主要支持以关系型数据库位数据源的Import数据集    (了解具体限制需参阅&lt;a href=&#34;https://docs.microsoft.com/en-us/power-bi/admin/service-encryption-byok#data-source-and-storage-considerations&#34;&gt;此文档&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;1.登录Azure创建Key Vault, 并分配Unwrap Key及Wrap Key权限&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;在这里插入图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;755&#34;
+        height=&#34;571&#34;
+        src=&#34;//localhost:1313/cc3225f7c69346fd8f78f34e2a4e4235_7161972180127661819.jpg&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;2.在Access Policy添加你要用于BYOK的Power BI工作区管理员账户以及Power BI Service服务主体&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;在这里插入图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;1776&#34;
+        height=&#34;993&#34;
+        src=&#34;//localhost:1313/6ea985987cf543359da2b1bea7142036_6872024161189560213.png&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;3.接下来按如下配置创建密钥&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;在这里插入图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;800&#34;
+        height=&#34;613&#34;
+        src=&#34;//localhost:1313/79309571380f43e19421b137c34b8a2c_10574865172136081328.jpg&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;4.现在，将上一步创建好的密钥应用到PBI容量，目前没有界面可供设置，需要在PowerShell中键入命令&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-Python&#34; data-lang=&#34;Python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;--&lt;/span&gt;安装Cmdlets&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;（&lt;/span&gt;已装跳过&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Install&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;Module &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;Name MicrosoftPowerBIMgmt
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;--&lt;/span&gt;登录
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Connect&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;PowerBIServiceAccount 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;--&lt;/span&gt;在整个PBI租户中启用BYOK
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Add&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;PowerBIEncryptionKey &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;Name &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;lt;输入Key名称&amp;gt;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;KeyVaultKeyUri &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;lt;输入Key URI&amp;gt;&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;--&lt;/span&gt;注&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;：&lt;/span&gt;其中Key URI可在Azure Key Vault中查询复制
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;--&lt;/span&gt;获取容量ID
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Get&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;PowerBICapacity &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;Scope Individual
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;--&lt;/span&gt;最后&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;，&lt;/span&gt;为该容量设置BYOK
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Set&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;PowerBICapacityEncryptionKey &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;CapacityId &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;输入容量ID&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;KeyName &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;lt;输入Key名称&amp;gt;&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;至此，BYOK即设置完成，输入以下命令检验：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-Python&#34; data-lang=&#34;Python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Get&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;PowerBIEncryptionKey
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如图显示即配置成功：&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;在这里插入图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;800&#34;
+        height=&#34;345&#34;
+        src=&#34;//localhost:1313/fd751b7a7d9a44a5991c526013cee56a_15328053850708017894.jpg&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

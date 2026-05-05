@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Power BI on D&amp;D | Davis on Data</title>
+    <link>//localhost:1313/tags/power-bi/</link>
+    <description>Recent content in Power BI on D&amp;D | Davis on Data</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 12 Mar 2022 08:03:50 +0000</lastBuildDate><atom:link href="//localhost:1313/tags/power-bi/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Azure Log Analytics：与 Power BI 集成</title>
+      <link>//localhost:1313/posts/2022-03-12-azure-log-analytics-with-powerbi/</link>
+      <pubDate>Sat, 12 Mar 2022 08:03:50 +0000</pubDate>
+      
+      <guid>//localhost:1313/posts/2022-03-12-azure-log-analytics-with-powerbi/</guid>
+      <description>
+        
+          
+            &lt;h3 id=&#34;前述&#34;&gt;前述&lt;/h3&gt;
+&lt;p&gt;Azure Log Analytics是Azure Monitor中的一项分析服务。本文将讲述通过Log Analytics与Power BI集成的方式，获取Power BI工作区内的日志信息，包括各PBI数据集的CPU消耗，查询数量及性能，以及数据刷新时长、数据刷新失败监测及用户查询活动等信息，这将极大地帮助Power BI管理员及其成员对工作区进行优化和管理，以及在出现负载问题时，快速找出问题的根源。&lt;/p&gt;
+&lt;h3 id=&#34;原理&#34;&gt;原理&lt;/h3&gt;
+&lt;p&gt;基本流程与原理：&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;在这里插入图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;740&#34;
+        height=&#34;320&#34;
+        src=&#34;//localhost:1313/a2c32c19482b43629744386291149eee_10395020413931223267.png&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h3 id=&#34;实施&#34;&gt;实施&lt;/h3&gt;
+&lt;h5 id=&#34;准备工作&#34;&gt;准备工作&lt;/h5&gt;
+&lt;p&gt;1.在Azure Portal中创建Log Analytics，可参考&lt;a href=&#34;https://docs.microsoft.com/en-us/azure/azure-monitor/logs/quick-create-workspace&#34;&gt;此文档&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;在这里插入图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;1399&#34;
+        height=&#34;982&#34;
+        src=&#34;//localhost:1313/86dcb5e247674416b7eb27a93abc32c2_2546283237101252166.png&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;2.启用&amp;rsquo;microsoft insights&amp;rsquo;, 可参考&lt;a href=&#34;https://docs.microsoft.com/en-us/power-bi/transform-model/log-analytics/desktop-log-analytics-configure#enable-the-microsoftinsights-resource-provider&#34;&gt;此文档&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;3.在Power BI中启用Log Analytics&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;在这里插入图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;1259&#34;
+        height=&#34;772&#34;
+        src=&#34;//localhost:1313/d7353dcddcc14431ae460688d0079072_15765225076112286764.png&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h5 id=&#34;连接到log-analytics&#34;&gt;连接到Log Analytics&lt;/h5&gt;
+&lt;p&gt;1.配置权限。此步骤，你也可以参考&lt;a href=&#34;https://docs.microsoft.com/en-us/power-bi/transform-model/log-analytics/desktop-log-analytics-configure#set-permissions&#34;&gt;微软文档&lt;/a&gt;，但其中内容并非最佳实践（截止到本文发布时的版本）。文档提到需要Power BI Service以及配置Log Analytics的用户都拥有Owner权限，但依据&lt;strong&gt;最低权限原则&lt;/strong&gt;，Power BI Service只需拥有Monitor Contributor权限即可。&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;请添加图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;1446&#34;
+        height=&#34;549&#34;
+        src=&#34;//localhost:1313/7a7c6eecc1684ea6aa2387cfed1da0f5_13002837224883855692.png&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;2.连接PBI工作区与Log Analytics工作区&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;在这里插入图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;1524&#34;
+        height=&#34;965&#34;
+        src=&#34;//localhost:1313/d466d6e9582a4e6dbb629b3bde3a0978_4296168409626519161.png&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;出现以下错误，一般是权限设置错误，确保Power BI Serice拥有Monitor Contributor权限（而非reader）
+&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;在这里插入图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;1748&#34;
+        height=&#34;807&#34;
+        src=&#34;//localhost:1313/e020b62e191249f2b9363331c4745604_6590180681067181615.png&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;连接成功后如下所示：&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;请添加图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;1738&#34;
+        height=&#34;905&#34;
+        src=&#34;//localhost:1313/41aa2ff14ed745e497af32fc33f4368a_15788095604341208915.png&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;h3 id=&#34;log-analytics-应用&#34;&gt;Log Analytics 应用&lt;/h3&gt;
+&lt;p&gt;利用Log Analytics分析Power BI工作区内容有两种方式：1.直接在Log Analytics工作区中查询；2.安装Power BI App: Log Analytics for Power BI Datasets Template (&lt;a href=&#34;https://docs.microsoft.com/en-us/power-bi/transform-model/log-analytics/install-as-engine-app&#34;&gt;安装教程&lt;/a&gt;)&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Power BI 企业数据安全</title>
+      <link>//localhost:1313/posts/2022-02-09-powerbi-enterprise-security/</link>
+      <pubDate>Tue, 08 Feb 2022 08:03:50 +0000</pubDate>
+      
+      <guid>//localhost:1313/posts/2022-02-09-powerbi-enterprise-security/</guid>
+      <description>
+        
+          
+            &lt;h1 id=&#34;前述&#34;&gt;前述&lt;/h1&gt;
+&lt;p&gt;数据不仅是企业对资产，也是企业的命脉，其重要性不言而喻。而随着越来越多的企业采用了Power BI作为其商务智能解决方案之一，用户对微软BI体系中数据的安全与合规性的要求也愈加严格。因文章篇幅问题，下文将以PBI及M365管理员的角度，节选Power BI平台中较为核心的数据安全问题，即“数据寄存，数据呈现及数据导出”几个方面进行图文讲解。&lt;/p&gt;
+&lt;h1 id=&#34;一pbi数据安全之数据寄存&#34;&gt;一、PBI数据安全之数据寄存&lt;/h1&gt;
+&lt;p&gt;当Power BI数据集发布到PBI Service后，其数据实际上存储在Azure Blob Storage, 在默认情况下，数据加密由Microsoft托管，而密钥的值，轮换规则以及加密方式则不受企业或组织的控制。尽管Microsoft使用了足够强大的256位AES加密算法，但在一些企业严苛的信息安全政策及合规部门严谨的审查工作面前，该说辞恐怕无济于事。为了使组织掌控密钥并使数据加密方式与轮换规则符合其政策，在Power BI实施BYOK（Bring your own Key）成为了唯一方案。&lt;/p&gt;
+&lt;h2 id=&#34;在pbi实施byok&#34;&gt;在PBI实施BYOK&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;注意：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;BYOK目前仅适用于PBI Premium (包括Capacity与Per User)&lt;/li&gt;
+&lt;li&gt;BYOK主要支持以关系型数据库位数据源的Import数据集    (了解具体限制需参阅&lt;a href=&#34;https://docs.microsoft.com/en-us/power-bi/admin/service-encryption-byok#data-source-and-storage-considerations&#34;&gt;此文档&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;1.登录Azure创建Key Vault, 并分配Unwrap Key及Wrap Key权限&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;在这里插入图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;755&#34;
+        height=&#34;571&#34;
+        src=&#34;//localhost:1313/cc3225f7c69346fd8f78f34e2a4e4235_7161972180127661819.jpg&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;2.在Access Policy添加你要用于BYOK的Power BI工作区管理员账户以及Power BI Service服务主体&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;在这里插入图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;1776&#34;
+        height=&#34;993&#34;
+        src=&#34;//localhost:1313/6ea985987cf543359da2b1bea7142036_6872024161189560213.png&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;3.接下来按如下配置创建密钥&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;在这里插入图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;800&#34;
+        height=&#34;613&#34;
+        src=&#34;//localhost:1313/79309571380f43e19421b137c34b8a2c_10574865172136081328.jpg&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;4.现在，将上一步创建好的密钥应用到PBI容量，目前没有界面可供设置，需要在PowerShell中键入命令&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-Python&#34; data-lang=&#34;Python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;--&lt;/span&gt;安装Cmdlets&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;（&lt;/span&gt;已装跳过&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;）&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Install&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;Module &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;Name MicrosoftPowerBIMgmt
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;--&lt;/span&gt;登录
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Connect&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;PowerBIServiceAccount 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;--&lt;/span&gt;在整个PBI租户中启用BYOK
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Add&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;PowerBIEncryptionKey &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;Name &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;lt;输入Key名称&amp;gt;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;KeyVaultKeyUri &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;lt;输入Key URI&amp;gt;&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;--&lt;/span&gt;注&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;：&lt;/span&gt;其中Key URI可在Azure Key Vault中查询复制
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;--&lt;/span&gt;获取容量ID
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Get&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;PowerBICapacity &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;Scope Individual
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;--&lt;/span&gt;最后&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;，&lt;/span&gt;为该容量设置BYOK
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Set&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;PowerBICapacityEncryptionKey &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;CapacityId &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt;输入容量ID&lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;KeyName &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;&amp;lt;输入Key名称&amp;gt;&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;至此，BYOK即设置完成，输入以下命令检验：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-Python&#34; data-lang=&#34;Python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Get&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;PowerBIEncryptionKey
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;如图显示即配置成功：&lt;/p&gt;
+&lt;p&gt;&lt;figure&gt;
+  &lt;picture&gt;
+
+    
+      
+        
+        
+        
+        
+        
+        
+    &lt;img
+      loading=&#34;lazy&#34;
+      decoding=&#34;async&#34;
+      alt=&#34;在这里插入图片描述&#34;
+      
+        class=&#34;image_figure image_external image_processed&#34;
+        width=&#34;800&#34;
+        height=&#34;345&#34;
+        src=&#34;//localhost:1313/fd751b7a7d9a44a5991c526013cee56a_15328053850708017894.jpg&#34;
+      
+      
+    /&gt;
+
+    &lt;/picture&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>
